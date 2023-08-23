@@ -1,6 +1,22 @@
+name: Prevent Changes to Important File
 on:
   push:
     branches:
-      - master
-    paths-ignore:
-      - "**/README.md"
+      - master # Adjust this to your branch name
+
+jobs:
+  prevent_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          # Check if "README.md" was modified in the push
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "Changed files: $CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q "README.md"; then
+            echo "Changes to README.md are not allowed."
+            exit 1
+          fi
